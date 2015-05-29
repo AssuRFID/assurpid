@@ -5,18 +5,24 @@ import nfc
 import time
 import signal
 import sys
+import sqlite3
 
 def clean_up():
     nfc.close(pnd)
     nfc.exit(context)
+    conn.close()
 
 def signal_handler(signal, frame):
     clean_up()
     sys.exit(0)
 
+# Ensure ^C doesn't corrupt/leave anything broken.
 signal.signal(signal.SIGINT, signal_handler)
 
-print('Version: ', nfc.__version__)
+print('libnfc version: ', nfc.__version__)
+
+conn = sqlite3.connect('/var/db/assurpid/assurpid.db')
+print('opened database successfully')
 
 context = nfc.init()
 pnd = nfc.open(context)
@@ -45,5 +51,5 @@ while True:
     print('Found tag with UID of', tag)
     time.sleep(1)
 
-nfc.close(pnd)
-nfc.exit(context)
+clean_up()
+sys.exit(0)
