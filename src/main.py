@@ -27,12 +27,12 @@ print('opened database successfully')
 context = nfc.init()
 pnd = nfc.open(context)
 if pnd is None:
-    print('ERROR: Unable to open NFC device.')
+    print('ERROR: Unable to detect RFID sensor (run this as root).')
     exit()
 
 if nfc.initiator_init(pnd) < 0:
     nfc.perror(pnd, "nfc_initiator_init")
-    print('ERROR: Unable to init NFC device.')
+    print('ERROR: Unable to init RFID sensor.')
     exit()
 
 print('NFC reader: %s opened' % nfc.device_get_name(pnd))
@@ -53,20 +53,42 @@ while True:
     cursor = conn.cursor()
     cursor.execute("SELECT UID, ADMIN, ACCESS_ROOM1, INSIDE_ROOM1 FROM MAIN WHERE UID = ?", (tag,))
     details = cursor.fetchone()
+    admin_switch = False
+
     if details is None:
         print("Tag is unrecognised")
+        if admin_switch:
+            conn.execute("INSERT INTO MAIN(UID, ADMIN, ACCESS_ROOM1, INSIDE_ROOM1) VALUES(?, 0, 1, 0)", (tag,))
+            conn.commit()
+            admin_switch = False
+            print("Added tag to database")
         time.sleep(1)
         continue
+    else:
+        print("Tag is recognised")
+        if admin_switch:
+            conn.execute("DELETE FROM MAIN WHERE UID = ?", (tag,))
+            conn.commit()
+            admin_switch = False
+            print("Deleted tag from database")
+            time.sleep(1)
+            continue
+
+    if details[1] == 1:
+        print("Tag is admin.")
+        admin_switch = True
+        time.sleep(1)
+        continue
+
     if details[3] == 1:
         print("Tag is inside Room 1.")
     else:
         print("Tag is outside Room 1.")
-    if details[1] == 1:
-        print("Tag is admin")
+
     if details[2] == 1:
-        print("Tag can open door to Room 1")
+        print("Tag can open door to Room 1.")
     else:
-        print("Tag cannot open door to Room 1")
+        print("Tag cannot open door to Room 1.")
 
     time.sleep(1)
 
