@@ -3,6 +3,7 @@
 
 import sqlite3
 import nfc
+import sys
 
 # Function to wait for an return a single tag UID. Returns a string.
 def get_tag():
@@ -33,22 +34,22 @@ def get_tag():
     return tag 
 
 # Function to ask user a yes/no question. Returns a bool
-def query_yes_no(question, defualt):
-    valid = {"yes": 1, "y": 1, "no": 0, "n": 0}
+def query_yes_no(question, default):
+    valid = {"yes": 1, "y": 1, "no": 0, "n": 0, True: 1, False:0}
     
     if default is None:
         prompt = " [y/n] "
     elif default == "yes" or default == True:
-        prompt == " [Y/n] "
+        prompt = " [Y/n] "
     elif default == "no" or default == False:
-        prompt == " [y/N] "
+        prompt = " [y/N] "
     else:
         raise ValueError("invalid default answer: '%s'" % default)
 
     while True:
         # Ask for yes/no/y/n
         sys.stdout.write(question + prompt)
-        choice = raw_input().lower()
+        choice = input().lower()
         # If user doesn't type anything and a default was set, the default is returned
         if default is not None and choice == '':
             return valid[default]
@@ -57,7 +58,7 @@ def query_yes_no(question, defualt):
             return valid[choice]
         # Otherwise, loop
         else:
-            sys.stdout.write("Please respond with 'yes', 'no', 'y' or 'n'"
+            sys.stdout.write("Please respond with 'yes', 'no', 'y' or 'n'")
 
 conn = sqlite3.connect('/var/db/assurpid/assurpid.db')
 print('opened database successfully')
@@ -70,9 +71,10 @@ run = True
 while run:
     print("Place a tag against the sensor")
     newtag = get_tag()
+    cursor = conn.cursor()
     # check if tag already exists
-    conn.execute("SELECT count(*) FROM MAIN WHERE NAME = ?", (newtag,))
-    exists = conn.fetchone()[0]
+    cursor.execute("SELECT count(*) FROM MAIN WHERE UID = ?", (newtag,))
+    exists = cursor.fetchone()[0]
 
     # If entry does not exist (no result), make a new one
     if exists == 0:
@@ -83,7 +85,7 @@ while run:
 
         # Insert row with specified values (SQLite doesn't have booleans, so we use ints)
         conn.execute("INSERT INTO MAIN (UID,ADMIN,ACCESS_ROOM1,INSIDE_ROOM1) \
-            VALUES (?, ?, ?, 0)", newtag, admin, access_room1)
+            VALUES (?, ?, ?, 0)", (newtag, admin, access_room1))
         # Always commit
         conn.commit()
         print("Records created successfully")
@@ -92,19 +94,19 @@ while run:
     else:
         print("Updating tag entry with UID", newtag)
         # Read existing values for tag
-        cursor = conn.execute("SELECT * FROM MAIN WHERE UID = '?'", newtag)
+        cursor = conn.execute("SELECT * FROM MAIN WHERE UID = ?", (newtag,))
         # Print them for clarity
         for row in cursor:
             print("UID              = ", row[0])
             print("Admin            = ", bool(row[1]))
-            print("Access to Room 1 = ", bool(row[2])
+            print("Access to Room 1 = ", bool(row[2]))
 
         # Then ask to amend them. Existing values (row[x]) are passed to query_yes_no as the default
         admin = query_yes_no("Should this be an administrator?", bool(row[1]))
         access_room1 = query_yes_no("Should this have access to Room 1?", bool(row[2]))
 
         # Update the database with the updated information
-        conn.execute("UPDATE MAIN SET ADMIN = ?, ACCESS_ROOM1 = ? WHERE UID = ?", admin, access_room1, newtag)
+        conn.execute("UPDATE MAIN SET ADMIN = ?, ACCESS_ROOM1 = ? WHERE UID = ?", (admin, access_room1, newtag))
 
         # Always commit!
         conn.commit()

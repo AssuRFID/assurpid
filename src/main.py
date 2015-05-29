@@ -46,9 +46,12 @@ nt = nfc.target()
 while True:
     # Wait for tag
     ret = nfc.initiator_select_passive_target(pnd, nmMifare, 0, 0, nt)
+
     # Convert raw uid to hex, then trim to length (2*nt.nti.nai.szUidLen)
     tag = ''.join(format(x, '02x') for x in nt.nti.nai.abtUid)[:2*nt.nti.nai.szUidLen]
     print('Found tag with UID of', tag)
+
+
     time.sleep(1)
 
 clean_up()
