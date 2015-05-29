@@ -39,12 +39,12 @@ nt = nfc.target()
 
 while True:
     ret = nfc.initiator_select_passive_target(pnd, nmMifare, 0, 0, nt)
-    print('The following (NFC) ISO14443A tag was found:')
     id = 1
     if nt.nti.nai.abtUid[0] == 8:
         id = 3
     print('       UID (NFCID%d): ' % id , end='')
-    nfc.print_hex(nt.nti.nai.abtUid, nt.nti.nai.szUidLen)
+    tag = ''.join(format(x, '02x') for x in nt.nti.nai.abtUid)[:2*nt.nti.nai.szUidLen]
+    print(tag, '')
     time.sleep(1)
 
 nfc.close(pnd)
