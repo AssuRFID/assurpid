@@ -50,7 +50,23 @@ while True:
     # Convert raw uid to hex, then trim to length (2*nt.nti.nai.szUidLen)
     tag = ''.join(format(x, '02x') for x in nt.nti.nai.abtUid)[:2*nt.nti.nai.szUidLen]
     print('Found tag with UID of', tag)
-
+    cursor = conn.cursor()
+    cursor.execute("SELECT UID, ADMIN, ACCESS_ROOM1, INSIDE_ROOM1 FROM MAIN WHERE UID = ?", (tag,))
+    details = cursor.fetchone()
+    if details is None:
+        print("Tag is unrecognised")
+        time.sleep(1)
+        continue
+    if details[3] == 1:
+        print("Tag is inside Room 1.")
+    else:
+        print("Tag is outside Room 1.")
+    if details[1] == 1:
+        print("Tag is admin")
+    if details[2] == 1:
+        print("Tag can open door to Room 1")
+    else:
+        print("Tag cannot open door to Room 1")
 
     time.sleep(1)
 
