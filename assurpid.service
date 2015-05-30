@@ -1,0 +1,9 @@
+[Unit]
+Description=An AssuRFID prototype
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/assurpid.py
+
+[Install]
+WantedBy=multi-user.target
