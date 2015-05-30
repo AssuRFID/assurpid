@@ -1,7 +1,7 @@
 # assurpid
 A Raspberry Pi based prototype, written in Python.
 
-## Dependencies:
+## Dependencies
 * [nfc-bindings](https://github.com/xantares/nfc-bindings)
 * [libnfc](http://nfc-tools.org/index.php?title=Libnfc)
 * [RPi.GPIO](http://sourceforge.net/projects/raspberry-gpio-python)
