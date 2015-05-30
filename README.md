@@ -1,5 +1,5 @@
 # assurpid
-A Raspberry Pi based prototype, written in Python.
+A Raspberry Pi based prototype, written in Python. It is released under the BSD 2-Clause license.
 
 ## Dependencies
 * [nfc-bindings](https://github.com/xantares/nfc-bindings)
