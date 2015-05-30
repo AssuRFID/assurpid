@@ -48,7 +48,7 @@ signal.signal(signal.SIGINT, signal_handler)
 conn = sqlite3.connect('/var/db/assurpid/assurpid.db')
 output('opened database successfully')
 
-output('libnfc version: ', nfc.__version__)
+output('libnfc version: ' + nfc.__version__)
 
 context = nfc.init()
 pnd = nfc.open(context)
@@ -61,7 +61,7 @@ if nfc.initiator_init(pnd) < 0:
     output('ERROR: Unable to init RFID sensor.')
     exit()
 
-output('NFC reader: %s opened' % nfc.device_get_name(pnd))
+output('NFC reader: ' + nfc.device_get_name(pnd) + 'opened')
 
 nmMifare = nfc.modulation()
 nmMifare.nmt = nfc.NMT_ISO14443A
@@ -75,17 +75,23 @@ while True:
     if not admin_switch:
         GPIO.cleanup()
 
-    output()
 
     # Wait for tag
     ret = nfc.initiator_select_passive_target(pnd, nmMifare, 0, 0, nt)
 
     # Convert raw uid to hex, then trim to length (2*nt.nti.nai.szUidLen)
     tag = ''.join(format(x, '02x') for x in nt.nti.nai.abtUid)[:2*nt.nti.nai.szUidLen]
-    output('Found tag with UID of', tag)
+    output('Found tag with UID of' + tag)
     cursor = conn.cursor()
     cursor.execute("SELECT UID, ADMIN, ACCESS_ROOM1, INSIDE_ROOM1 FROM MAIN WHERE UID = ?", (tag,))
     details = cursor.fetchone()
+
+    if details[1] == 1:
+        output("Tag is admin.")
+        light_on('magenta')
+        admin_switch = True
+        time.sleep(sleep_time)
+        continue
 
     if details is None:
         output("Tag is unrecognised")
@@ -108,13 +114,6 @@ while True:
             output("Deleted tag from database")
             time.sleep(sleep_time)
             continue
-
-    if details[1] == 1:
-        output("Tag is admin.")
-        light_on('magenta')
-        admin_switch = True
-        time.sleep(sleep_time)
-        continue
 
     if details[3] == 1:
         output("Tag is inside Room 1.")
