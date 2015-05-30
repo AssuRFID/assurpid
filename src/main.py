@@ -90,7 +90,14 @@ while True:
         print("Tag can open door to Room 1.")
     else:
         print("Tag cannot open door to Room 1.")
-
+    
+    if details[2] == 1 and details[3]:
+        conn.execute("UPDATE MAIN SET INSIDE_ROOM1 = 0 WHERE UID = ?", (tag,))
+        print("Door opened from inside, tag now outside.")
+    
+    if details[2] == 1 and details[3] == 0:
+        conn.execute("UPDATE MAIN SET INSIDE_ROOM1 = 1 WHERE UID = ?", (tag,))
+        print("Door opened from outside, tag now inside.")
     time.sleep(1)
 
 clean_up()
