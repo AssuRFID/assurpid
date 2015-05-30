@@ -43,6 +43,8 @@ nmMifare.nbr = nfc.NBR_106
 
 nt = nfc.target()
 
+admin_switch = False
+
 while True:
     # Wait for tag
     ret = nfc.initiator_select_passive_target(pnd, nmMifare, 0, 0, nt)
@@ -53,7 +55,6 @@ while True:
     cursor = conn.cursor()
     cursor.execute("SELECT UID, ADMIN, ACCESS_ROOM1, INSIDE_ROOM1 FROM MAIN WHERE UID = ?", (tag,))
     details = cursor.fetchone()
-    admin_switch = False
 
     if details is None:
         print("Tag is unrecognised")
