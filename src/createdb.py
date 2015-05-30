@@ -60,6 +60,8 @@ def query_yes_no(question, default):
         else:
             sys.stdout.write("Please respond with 'yes', 'no', 'y' or 'n'")
 
+# Make directory in /var/db if it doesn't exist already
+os.makedirs("/var/db/assurpid", 0o740, True)
 conn = sqlite3.connect('/var/db/assurpid/assurpid.db')
 print('opened database successfully')
 
