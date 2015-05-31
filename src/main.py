@@ -86,13 +86,6 @@ while True:
     cursor.execute("SELECT UID, ADMIN, ACCESS_ROOM1, INSIDE_ROOM1 FROM MAIN WHERE UID = ?", (tag,))
     details = cursor.fetchone()
 
-    if details[1] == 1:
-        output("Tag is admin.")
-        light_on('magenta')
-        admin_switch = True
-        time.sleep(sleep_time)
-        continue
-
     if details is None:
         output("Tag is unrecognised")
         light_on('red')
@@ -114,6 +107,13 @@ while True:
             output("Deleted tag from database")
             time.sleep(sleep_time)
             continue
+
+    if details[1] == 1:
+        output("Tag is admin.")
+        light_on('magenta')
+        admin_switch = True
+        time.sleep(sleep_time)
+        continue
 
     if details[3] == 1:
         output("Tag is inside Room 1.")
