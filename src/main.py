@@ -81,7 +81,7 @@ while True:
 
     # Convert raw uid to hex, then trim to length (2*nt.nti.nai.szUidLen)
     tag = ''.join(format(x, '02x') for x in nt.nti.nai.abtUid)[:2*nt.nti.nai.szUidLen]
-    output('Found tag with UID of' + tag)
+    output('Found tag with UID of ' + tag)
     cursor = conn.cursor()
     cursor.execute("SELECT UID, ADMIN, ACCESS_ROOM1, INSIDE_ROOM1 FROM MAIN WHERE UID = ?", (tag,))
     details = cursor.fetchone()
